@@ -28,6 +28,12 @@
 	origin_tech = "materials=1;engineering=1"
 	attack_verb = list("bashed", "battered", "bludgeoned", "whacked")
 
+	white
+		name = "CE's wrench"
+		desc = "There is a label on it that says 'PROPERTY OF THE CHIEF ENGINEER'."
+		icon_state = "white_wrench"
+		item_state = "wrench"
+
 
 /*
  * Screwdriver
@@ -47,6 +53,35 @@
 	g_amt = 0
 	m_amt = 75
 	attack_verb = list("stabbed")
+	var/randomsprite = 1
+
+	proc/randomizesprite()
+		switch(pick("red","blue","purple","brown","green","cyan","yellow"))
+			if ("red")
+				icon_state = "screwdriver2"
+				item_state = "screwdriver"
+			if ("blue")
+				icon_state = "screwdriver"
+				item_state = "screwdriver_blue"
+			if ("purple")
+				icon_state = "screwdriver3"
+				item_state = "screwdriver_purple"
+			if ("brown")
+				icon_state = "screwdriver4"
+				item_state = "screwdriver_brown"
+			if ("green")
+				icon_state = "screwdriver5"
+				item_state = "screwdriver_green"
+			if ("cyan")
+				icon_state = "screwdriver6"
+				item_state = "screwdriver_cyan"
+			if ("yellow")
+				icon_state = "screwdriver7"
+				item_state = "screwdriver_yellow"
+
+		if (prob(75))
+			src.pixel_y = rand(0, 16)
+		return
 
 	suicide_act(mob/user)
 		viewers(user) << pick("\red <b>[user] is stabbing the [src.name] into \his temple! It looks like \he's trying to commit suicide.</b>", \
@@ -54,32 +89,8 @@
 		return(BRUTELOSS)
 
 /obj/item/weapon/screwdriver/New()
-	switch(pick("red","blue","purple","brown","green","cyan","yellow"))
-		if ("red")
-			icon_state = "screwdriver2"
-			item_state = "screwdriver"
-		if ("blue")
-			icon_state = "screwdriver"
-			item_state = "screwdriver_blue"
-		if ("purple")
-			icon_state = "screwdriver3"
-			item_state = "screwdriver_purple"
-		if ("brown")
-			icon_state = "screwdriver4"
-			item_state = "screwdriver_brown"
-		if ("green")
-			icon_state = "screwdriver5"
-			item_state = "screwdriver_green"
-		if ("cyan")
-			icon_state = "screwdriver6"
-			item_state = "screwdriver_cyan"
-		if ("yellow")
-			icon_state = "screwdriver7"
-			item_state = "screwdriver_yellow"
-
-	if (prob(75))
-		src.pixel_y = rand(0, 16)
-	return
+	if(randomsprite)
+		randomizesprite()
 
 /obj/item/weapon/screwdriver/attack(mob/living/carbon/M as mob, mob/living/carbon/user as mob)
 	if(!istype(M))	return ..()
@@ -88,6 +99,12 @@
 	if((CLUMSY in user.mutations) && prob(50))
 		M = user
 	return eyestab(M,user)
+
+/obj/item/weapon/screwdriver/white
+	name = "CE's screwdriver"
+	desc = "There is a label on it that says 'PROPERTY OF THE CHIEF ENGINEER'."
+	icon_state = "white_screwdriver"
+	randomsprite = 0
 
 /*
  * Wirecutters
@@ -106,11 +123,16 @@
 	m_amt = 80
 	origin_tech = "materials=1;engineering=1"
 	attack_verb = list("pinched", "nipped")
+	var/randomsprite = 1
+
+	proc/randomizesprite()
+		if(prob(50))
+			icon_state = "cutters-y"
+			item_state = "cutters_yellow"
 
 /obj/item/weapon/wirecutters/New()
-	if(prob(50))
-		icon_state = "cutters-y"
-		item_state = "cutters_yellow"
+	if(randomsprite)
+		randomizesprite()
 
 /obj/item/weapon/wirecutters/attack(mob/living/carbon/C, mob/user)
 	if(istype(C) && C.handcuffed && istype(C.handcuffed, /obj/item/weapon/handcuffs/cable))
@@ -122,6 +144,12 @@
 	else
 		..()
 
+/obj/item/weapon/wirecutters/white
+	name = "CE's wirecutters"
+	desc = "There is a label on it that says 'PROPERTY OF THE CHIEF ENGINEER'."
+	icon_state = "white_cutters"
+	randomsprite = 0
+
 /*
  * Welding Tool
  */
@@ -129,6 +157,8 @@
 	name = "welding tool"
 	icon = 'icons/obj/items.dmi'
 	icon_state = "welder"
+	var/icon_on = "welder1"
+	var/icon_off = "welder"
 	flags = FPRINT | TABLEPASS| CONDUCT
 	slot_flags = SLOT_BELT
 	force = 3
@@ -164,19 +194,19 @@
 /obj/item/weapon/weldingtool/process()
 	switch(welding)
 		if(0)
-			if(icon_state != "welder")	//Check that the sprite is correct, if it isnt, it means toggle() was not called
+			if(icon_state != icon_off)	//Check that the sprite is correct, if it isnt, it means toggle() was not called
 				force = 3
 				damtype = "brute"
-				icon_state = "welder"
+				icon_state = icon_off
 				welding = 0
 			processing_objects.Remove(src)
 			return
 	//Welders left on now use up fuel, but lets not have them run out quite that fast
 		if(1)
-			if(icon_state != "welder1")	//Check that the sprite is correct, if it isnt, it means toggle() was not called
+			if(icon_state != icon_on)	//Check that the sprite is correct, if it isnt, it means toggle() was not called
 				force = 15
 				damtype = "fire"
-				icon_state = "welder1"
+				icon_state = icon_on
 			if(prob(5))
 				remove_fuel(1)
 
@@ -273,7 +303,7 @@
 			user << "<span class='notice'>You switch [src] on.</span>"
 			force = 15
 			damtype = "fire"
-			icon_state = "welder1"
+			icon_state = icon_on
 			processing_objects.Add(src)
 		else
 			user << "<span class='notice'>Need more fuel.</span>"
@@ -285,7 +315,7 @@
 			user << "<span class='notice'>[src] shuts off!</span>"
 		force = 3
 		damtype = "brute"
-		icon_state = "welder"
+		icon_state = icon_off
 		welding = 0
 
 
@@ -354,6 +384,16 @@
 	g_amt = 60
 	origin_tech = "engineering=2"
 
+/obj/item/weapon/weldingtool/white
+	name = "CE's welding tool"
+	desc = "There is a label on it that says 'PROPERTY OF THE CHIEF ENGINEER'."
+	max_fuel = 50
+	m_amt = 70
+	g_amt = 60
+	icon_state = "white_welder"
+	icon_on = "white_welder1"
+	icon_off = "white_welder"
+
 /obj/item/weapon/weldingtool/largetank/cyborg
 
 /obj/item/weapon/weldingtool/largetank/cyborg/flamethrower_screwdriver()
@@ -413,3 +453,8 @@
 	icon = 'icons/obj/items.dmi'
 	icon_state = "red_crowbar"
 	item_state = "crowbar_red"
+
+/obj/item/weapon/crowbar/white
+	name = "CE's crowbar"
+	desc = "There is a label on it that says 'PROPERTY OF THE CHIEF ENGINEER'."
+	icon_state = "white_crowbar"
