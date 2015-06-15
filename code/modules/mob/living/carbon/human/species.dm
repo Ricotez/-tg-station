@@ -84,6 +84,7 @@
 	// PROCS //
 	///////////
 
+
 /datum/species/proc/update_base_icon_state(var/mob/living/carbon/human/H)
 	if(H.disabilities & HUSK)
 		H.remove_overlay(SPECIES_LAYER) // races lose their color
@@ -95,7 +96,7 @@
 			return "[id]_[(H.gender == FEMALE) ? "f" : "m"]"
 	else
 		return "[id]"
-
+/*
 /datum/species/proc/update_color(var/mob/living/carbon/human/H)
 	H.remove_overlay(SPECIES_LAYER)
 
@@ -120,6 +121,7 @@
 		H.overlays_standing[SPECIES_LAYER]	+= standing
 
 	H.apply_overlay(SPECIES_LAYER)
+*/
 
 /datum/species/proc/handle_hair(var/mob/living/carbon/human/H)
 	H.remove_overlay(HAIR_LAYER)
@@ -146,7 +148,8 @@
 			standing	+= img_facial_s
 
 	//Applies the debrained overlay if there is no brain
-	if(!H.getorgan(/obj/item/organ/brain))
+	var/datum/organ/brain/B = H.getorgan(/datum/organ/brain)
+	if(!B || !B.organitem)
 		standing	+= image("icon"='icons/mob/human_face.dmi', "icon_state" = "debrained_s", "layer" = -HAIR_LAYER)
 
 	if((H.wear_suit) && (H.wear_suit.hooded) && (H.wear_suit.suittoggled == 1))
@@ -646,26 +649,31 @@
 
 	if(H.healthdoll)
 		H.healthdoll.overlays.Cut()
-		if(H.stat == DEAD)
-			H.healthdoll.icon_state = "healthdoll_DEAD"
-		else
-			H.healthdoll.icon_state = "healthdoll_OVERLAY"
-			for(var/obj/item/organ/limb/L in H.organs)
-				var/damage = L.burn_dam + L.brute_dam
-				var/comparison = (L.max_damage/5)
-				var/icon_num = 0
-				if(damage)
-					icon_num = 1
-				if(damage > (comparison))
-					icon_num = 2
-				if(damage > (comparison*2))
-					icon_num = 3
-				if(damage > (comparison*3))
-					icon_num = 4
-				if(damage > (comparison*4))
-					icon_num = 5
-				if(icon_num)
-					H.healthdoll.overlays += image('icons/mob/screen_gen.dmi',"[L.name][icon_num]")
+		H.healthdoll.icon_state = "healthdoll_SHADE"
+		for(var/datum/organ/limb/O in H.organsystem.organlist)
+			if(O && O.healthdoll) //If this organ is actually there and wants to be drawn on the healthdoll...
+				var/obj/item/organ/limb/L = O.organitem
+				var/icon_name = "full"
+				if(O.exists())
+					var/damage = L.burn_dam + L.brute_dam
+					var/comparison = (L.max_damage/5)
+					if(H.stat == DEAD)
+						icon_name  = "dead"
+					else if(damage > (comparison*4))
+						icon_name  = 5
+					else if(damage > (comparison*3))
+						icon_name  = 4
+					else if(damage > (comparison*2))
+						icon_name  = 3
+					else if(damage > (comparison))
+						icon_name  = 2
+					else if(damage)
+						icon_name  = 1
+				else if((O.status & ORGAN_DESTROYED)) //The organ no longer exists, but the wound is still there.
+					icon_name  = "destroyed"
+				H.healthdoll.overlays += image('icons/mob/screen_gen.dmi',"[L.name][icon_name]")
+			//Else the organ does not exist but there is no damage either, so we don't render anything at all.
+
 
 	switch(H.nutrition)
 		if(NUTRITION_LEVEL_FULL to INFINITY)
@@ -828,8 +836,17 @@
 					H.visible_message("<span class='warning'>[M] has attempted to [atk_verb] [H]!</span>")
 					return 0
 
-
-				var/obj/item/organ/limb/affecting = H.get_organ(ran_zone(M.zone_sel.selecting))
+				var/obj/item/organ/limb/affecting
+				var/datum/organ/limb/targetorgan = H.get_organ(ran_zone(M.zone_sel.selecting))
+				if(!targetorgan.exists())
+					//If target organ does not exist, the attack misses.
+					//Combined with the slight randomness of attack zones, this means that targets with less limbs are less likely to get hit.
+					//I'm not sure if I want to keep it that way, but I suppose that less limbs makes you a smaller target. |- Ricotez
+					playsound(H.loc, 'sound/weapons/punchmiss.ogg', 25, 1, -1)
+					H.visible_message("<span class='warning'>[M] has attempted to [atk_verb] [H]!</span>")
+					return 0
+				else
+					affecting = targetorgan.organitem
 				var/armor_block = H.run_armor_check(affecting, "melee")
 
 				if(M.dna)
@@ -858,7 +875,15 @@
 
 				if(H.w_uniform)
 					H.w_uniform.add_fingerprint(M)
-				var/obj/item/organ/limb/affecting = H.get_organ(ran_zone(M.zone_sel.selecting))
+				var/obj/item/organ/limb/affecting
+				var/datum/organ/limb/targetorgan = H.get_organ(ran_zone(M.zone_sel.selecting))
+				if(!targetorgan.exists())
+					//If target organ does not exist, the disarm misses.
+					//Same story as attacks. |- Ricotez
+					H.visible_message("<span class='warning'>[M] has attempted to push [H]!</span>")
+					return 0
+				else
+					affecting = targetorgan.organitem
 				var/randn = rand(1, 100)
 				if(randn <= 25)
 					playsound(H, 'sound/weapons/thudswoosh.ogg', 50, 1, -1)
@@ -1027,7 +1052,8 @@
 		organ = def_zone
 	else
 		if(!def_zone)	def_zone = ran_zone(def_zone)
-		organ = H.get_organ(check_zone(def_zone))
+		var/datum/organ/O = H.get_organ(check_zone(def_zone))
+		organ = O.organitem
 	if(!organ)	return 0
 
 	damage = (damage * blocked)

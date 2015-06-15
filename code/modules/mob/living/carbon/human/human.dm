@@ -6,7 +6,6 @@
 	icon_state = "caucasian1_m_s"
 
 
-
 /mob/living/carbon/human/dummy
 	real_name = "Test Dummy"
 	status_flags = GODMODE|CANPUSH
@@ -18,13 +17,46 @@
 	verbs += /mob/living/proc/mob_sleep
 	verbs += /mob/living/proc/lay_down
 	//initialise organs
-	organs = newlist(/obj/item/organ/limb/chest, /obj/item/organ/limb/head, /obj/item/organ/limb/l_arm,
-					 /obj/item/organ/limb/r_arm, /obj/item/organ/limb/r_leg, /obj/item/organ/limb/l_leg)
-	for(var/obj/item/organ/limb/O in organs)
+	/*organs = newlist(/obj/item/organ/limb/chest, /obj/item/organ/limb/head, /obj/item/organ/limb/l_arm,
+					 /obj/item/organ/limb/r_arm, /obj/item/organ/limb/r_leg, /obj/item/organ/limb/l_leg)*/
+
+	organsystem = new/datum/organsystem/humanoid/human
+
+	//YES THIS IS KIND OF WEIRD but it's how BYOND works, I would have much rather used getorgan().set_organitem |- Ricotez
+	var/datum/organ/setter
+	setter = getorgan("chest")
+	setter.set_organitem(new/obj/item/organ/limb/chest)
+	setter = getorgan("head")
+	setter.set_organitem(new/obj/item/organ/limb/head)
+	setter = getorgan("l_arm")
+	setter.set_organitem(new/obj/item/organ/limb/l_arm)
+	setter = getorgan("r_arm")
+	setter.set_organitem(new/obj/item/organ/limb/r_arm)
+	setter = getorgan("l_leg")
+	setter.set_organitem(new/obj/item/organ/limb/l_leg)
+	setter = getorgan("r_leg")
+	setter.set_organitem(new/obj/item/organ/limb/r_leg)
+
+	//This list is deprecated for any mob that has an organ system. We only fill it now in case an older part of the code hasn't been updated to the new system yet.
+	organs = list(organsystem.getorgan("chest"), organsystem.getorgan("head"), organsystem.getorgan("l_arm"), organsystem.getorgan("r_arm"), organsystem.getorgan("l_leg"), organsystem.getorgan("r_leg"))
+
+	setter = getorgan("appendix")
+	setter.set_organitem(new/obj/item/organ/appendix)
+	setter = getorgan("heart")
+	setter.set_organitem(new/obj/item/organ/heart)
+	setter = getorgan("brain")
+	setter.set_organitem(new/obj/item/organ/brain)
+
+	for(var/datum/organ/limb/O in organsystem.organlist)
 		O.owner = src
-	internal_organs += new /obj/item/organ/appendix
-	internal_organs += new /obj/item/organ/heart
-	internal_organs += new /obj/item/organ/brain
+		if(O.organitem)
+			O.organitem.owner = src
+
+	//This list is also deprecated for any mob that has an organ system.
+	internal_organs += getorgan("appendix")
+	internal_organs += getorgan("heart")
+	internal_organs += getorgan("brain")
+
 
 	// for spawned humans; overwritten by other code
 	ready_dna(src)
@@ -50,6 +82,7 @@
 	for(var/atom/movable/organelle in organs)
 		qdel(organelle)
 	organs = list()
+	organsystem.Destroy()
 	return ..()
 
 /mob/living/carbon/human/Stat()
