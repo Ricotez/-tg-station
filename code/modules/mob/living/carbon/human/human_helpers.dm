@@ -55,10 +55,14 @@
 		return if_no_face
 	if( head && (head.flags_inv&HIDEFACE) )
 		return if_no_face		//Likewise for hats
-	var/obj/item/organ/limb/O = get_organ("head")
-	if( (status_flags&DISFIGURED) || (O.brutestate+O.burnstate)>2 || cloneloss>50 || !real_name )	//disfigured. use id-name if possible
-		return if_no_face
-	return real_name
+	var/datum/organ/limb/head/H = getorgan("head")
+	if(H.counts_for_damage())
+		var/obj/item/organ/limb/head/O = H.organitem
+		if( (status_flags&DISFIGURED) || (O.brutestate+O.burnstate)>2 || cloneloss>50 || !real_name )	//disfigured. use id-name if possible
+			return if_no_face
+		return real_name
+	else
+		return if_no_face //Human has no head, therefore no face.
 
 //gets name from ID or PDA itself, ID inside PDA doesn't matter
 //Useful when player is being seen by other mobs
@@ -139,10 +143,10 @@
 
 /mob/living/carbon/human/can_track(mob/living/user)
 	if(wear_id && istype(wear_id.GetID(), /obj/item/weapon/card/id/syndicate))
-		return 0 
+		return 0
 	if(istype(head, /obj/item/clothing/head))
 		var/obj/item/clothing/head/hat = head
 		if(hat.blockTracking)
 			return 0
-	
+
 	return ..()

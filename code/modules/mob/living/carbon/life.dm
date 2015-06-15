@@ -262,8 +262,14 @@
 /mob/living/carbon/handle_regular_status_updates()
 
 	if(..()) //alive
-
-		if(health <= config.health_threshold_dead || !getorgan(/obj/item/organ/brain))
+		var/brain = null
+		if(organsystem)
+			var/datum/organ/brain/B = getorgan("brain")
+			if(B)
+				brain = B.organitem
+		else
+			brain = getorgan(/obj/item/organ/brain)
+		if(health <= config.health_threshold_dead || !brain)
 			death()
 			return
 

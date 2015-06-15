@@ -74,10 +74,6 @@
 #define TR_DEFAULTMSG	64
 #define TR_KEEPSRC		128
 
-//Organ stuff, It's here because "Genetics" is the most relevant file for organs
-#define ORGAN_ORGANIC   1
-#define ORGAN_ROBOTIC   2
-
 //Nutrition levels for humans. No idea where else to put it
 #define NUTRITION_LEVEL_FAT 600
 #define NUTRITION_LEVEL_FULL 550

@@ -172,7 +172,6 @@
 			LIMB.owner = src
 	update_icons()
 	update_damage_overlays(0)
-	update_augments()
 
 	hand = 0
 
