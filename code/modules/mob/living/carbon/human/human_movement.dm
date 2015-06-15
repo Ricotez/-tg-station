@@ -55,7 +55,7 @@ mob/living/carbon/human/proc/get_penalty_for_limb(limb)
 
 /mob/living/carbon/human/experience_pressure_difference()
 	playsound(src, 'sound/effects/space_wind.ogg', 50, 1)
-	if(shoes.flags&NOSLIP)
+	if(shoes && shoes.flags&NOSLIP)
 		return 0
 	. = ..()
 
