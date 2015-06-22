@@ -263,8 +263,13 @@
 
 	if(..()) //alive
 
-		if(health <= config.health_threshold_dead || !getorgan(/obj/item/organ/brain))
-			death()
+		if(health <= config.health_threshold_dead)
+			if(organsystem)
+				var/datum/organ/B = getorgan("brain")
+				if(!B.exists())
+					death()
+			else if(!getorgan(/obj/item/organ/brain))
+				death()
 			return
 
 		if(getOxyLoss() > 50 || health <= config.health_threshold_crit)

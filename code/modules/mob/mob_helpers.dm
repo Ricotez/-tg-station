@@ -466,7 +466,8 @@ It's fairly easy to fix if dealing with single letters but not so much with comp
 				O << sound(ghost_sound)
 
 /proc/item_heal_robotic(var/mob/living/carbon/human/H, var/mob/user, var/brute, var/burn)
-	var/obj/item/organ/limb/affecting = H.get_organ(check_zone(user.zone_sel.selecting))
+	var/datum/organ/limb/limbdata = H.get_organ(check_zone(user.zone_sel.selecting))
+	var/obj/item/organ/limb/affecting = limbdata.organitem
 
 	var/dam //changes repair text based on how much brute/burn was supplied
 
@@ -475,7 +476,7 @@ It's fairly easy to fix if dealing with single letters but not so much with comp
 	else
 		dam = 0
 
-	if(affecting.status == ORGAN_ROBOTIC)
+	if(affecting.organtype == ORGAN_ROBOTIC)
 		if(brute > 0 && affecting.brute_dam > 0 || burn > 0 && affecting.burn_dam > 0)
 			affecting.heal_damage(brute,burn,1)
 			H.update_damage_overlays(0)
@@ -488,3 +489,6 @@ It's fairly easy to fix if dealing with single letters but not so much with comp
 	else
 		return
 
+
+mob/proc/active_hand_exists()
+	return 1

@@ -17,6 +17,23 @@
 	return null
 
 
+//We need to override put_in_l/r_hand to check if said hands even exist in the first place.
+//After that we can just call the super. |- Ricotez
+/mob/living/carbon/put_in_l_hand(var/obj/item/W)
+	if(organsystem)
+		var/datum/organ/limb/limbdata = getorgan("l_arm")
+		if(!limbdata.exists())
+			return 0
+	return ..()
+
+/mob/living/carbon/put_in_r_hand(var/obj/item/W)
+	if(organsystem)
+		var/datum/organ/limb/limbdata = getorgan("r_arm")
+		if(!limbdata.exists())
+			return 0
+	return ..()
+
+
 /mob/living/carbon/unEquip(obj/item/I) //THIS PROC DID NOT CALL ..() AND THAT COST ME AN ENTIRE DAY OF DEBUGGING.
 	. = ..() //Sets the default return value to what the parent returns.
 	if(!. || !I) //We don't want to set anything to null if the parent returned 0.

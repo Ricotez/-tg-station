@@ -22,13 +22,13 @@
 				if(istype(M, /mob/living/carbon/human))
 					var/mob/living/carbon/human/H = M //So we can use get_organ and not some terriblly long Switch or something worse - RR
 
-					if(S.requires_organic_chest && H.getlimb(/obj/item/organ/limb/robot/chest)) //This a seperate case to below, see "***" in surgery.dm - RR
+					if(S.requires_organic_chest && H.getlimb(/obj/item/organ/limb/chest/robot)) //This a seperate case to below, see "***" in surgery.dm - RR
 						continue
 
+					var/datum/organ/limb/limbdata = H.get_organ(check_zone(user.zone_sel.selecting))
+					var/obj/item/organ/limb/affecting = limbdata.organitem
 
-					var/obj/item/organ/limb/affecting = H.get_organ(check_zone(user.zone_sel.selecting))
-
-					if(affecting.status == ORGAN_ROBOTIC && affecting.body_part != HEAD) //Cannot operate on Robotic organs except for the head. - RR
+					if(affecting.organtype == ORGAN_ROBOTIC && affecting.body_part != HEAD) //Cannot operate on Robotic organs except for the head. - RR
 						continue
 
 				for(var/path in S.species)

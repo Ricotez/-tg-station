@@ -129,6 +129,9 @@
 	if((I.flags & NODROP) && !force)
 		return 0
 
+	if(!active_hand_exists())
+		return 0 //Cannot unequip with a hand that does not exist. |- Ricotez
+
 	if(I == r_hand)
 		r_hand = null
 		update_inv_r_hand()

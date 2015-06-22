@@ -77,25 +77,25 @@
 			H.organs -= L
 			switch(target_zone)
 				if("r_leg")
-					H.organs += new /obj/item/organ/limb/robot/r_leg(src)
+					H.organs += new /obj/item/organ/limb/r_leg/robot(src)
 				if("l_leg")
-					H.organs += new /obj/item/organ/limb/robot/l_leg(src)
+					H.organs += new /obj/item/organ/limb/l_leg/robot(src)
 				if("r_arm")
-					H.organs += new /obj/item/organ/limb/robot/r_arm(src)
+					H.organs += new /obj/item/organ/limb/r_arm/robot(src)
 				if("l_arm")
-					H.organs += new /obj/item/organ/limb/robot/l_arm(src)
+					H.organs += new /obj/item/organ/limb/l_arm/robot(src)
 				if("head")
-					H.organs += new /obj/item/organ/limb/robot/head(src)
+					H.organs += new /obj/item/organ/limb/head/robot(src)
 				if("chest")
 					var/datum/surgery_step/xenomorph_removal/xeno_removal = new
 					xeno_removal.remove_xeno(user, target) // remove an alien if there is one
-					H.organs += new /obj/item/organ/limb/robot/chest(src)
+					H.organs += new /obj/item/organ/limb/chest/robot(src)
 					for(var/datum/disease/appendicitis/A in H.viruses) //If they already have Appendicitis, Remove it
 						A.cure(1)
 			user.drop_item()
 			qdel(tool)
 			H.update_damage_overlays(0)
-			H.update_augments() //Gives them the Cyber limb overlay
+			H.update_body_parts() //Gives them the Cyber limb overlay
 			add_logs(user, target, "augmented", addition="by giving him new [parse_zone(target_zone)] INTENT: [uppertext(user.a_intent)]")
 	else
 		user << "<span class='warning'>[target] has no organic [parse_zone(target_zone)] there!</span>"

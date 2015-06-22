@@ -281,10 +281,26 @@
 
 /mob/living/carbon/can_use_hands()
 	if(handcuffed)
+		if(organsystem)
+			var/datum/organ/limb/LH = getorgan("l_arm")
+			var/datum/organ/limb/RH = getorgan("r_arm")
+			return !LH.exists() || !RH.exists() //Handcuffs only work if you have 2 hands.
 		return 0
 	if(buckled && ! istype(buckled, /obj/structure/stool/bed/chair)) // buckling does not restrict hands
 		return 0
 	return 1
+
+/mob/living/carbon/active_hand_exists()
+	if(organsystem)
+		var/datum/organ/limb/activehand
+		if(hand)
+			activehand = getorgan("l_arm")
+		else
+			activehand = getorgan("r_arm")
+		return activehand.exists()
+	else
+		..()
+
 
 /mob/living/carbon/restrained()
 	if (handcuffed)

@@ -514,8 +514,9 @@ var/global/list/datum/stack_recipe/cable_coil_recipes = list ( \
 	if(!istype(H))
 		return ..()
 
-	var/obj/item/organ/limb/affecting = H.get_organ(check_zone(user.zone_sel.selecting))
-	if(affecting.status == ORGAN_ROBOTIC)
+	var/datum/organ/limb/limbdata = H.get_organ(check_zone(user.zone_sel.selecting))
+	var/obj/item/organ/limb/affecting = limbdata.organitem
+	if(affecting.organtype == ORGAN_ROBOTIC)
 		item_heal_robotic(H, user, 0, 30)
 		src.use(1)
 		return

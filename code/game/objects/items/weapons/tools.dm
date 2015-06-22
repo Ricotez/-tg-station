@@ -208,14 +208,17 @@
 	if(!istype(H))
 		return ..()
 
-	var/obj/item/organ/limb/affecting = H.get_organ(check_zone(user.zone_sel.selecting))
-
-	if(affecting.status == ORGAN_ROBOTIC && user.a_intent != "harm")
-		if(src.remove_fuel(0))
-			item_heal_robotic(H, user, 30, 0)
-			return
+	var/datum/organ/limb/limbdata = H.get_organ(check_zone(user.zone_sel.selecting))
+	if(limbdata.exists())
+		var/obj/item/organ/limb/affecting = limbdata.organitem
+		if(affecting.organtype == ORGAN_ROBOTIC && user.a_intent != "harm")
+			if(src.remove_fuel(0))
+				item_heal_robotic(H, user, 30, 0)
+				return
+			else
+				return
 		else
-			return
+			return ..()
 	else
 		return ..()
 
