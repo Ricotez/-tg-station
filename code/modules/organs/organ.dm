@@ -5,6 +5,8 @@
 	var/status = 0
 	var/organtype = ORGAN_ORGANIC
 	var/status_flags
+	var/datum/organ/organdatum
+	var/list/suborgans = list()
 
 /obj/item/organ/heart
 	name = "heart"
@@ -68,7 +70,6 @@
 	max_damage = 200
 	body_part = HEAD
 	var/mob/living/carbon/brain/brainmob = null //We're not using this until someone is beheaded.
-	var/obj/item/organ/brain/brain = null
 
 /obj/item/organ/limb/head/examine(mob/user)
 	..()
@@ -77,24 +78,30 @@
 	else
 		user << "Their eyes are completely lifeless. Perhaps they will regain some of their luster later."
 
-/obj/item/organ/limb/head/proc/behead(mob/living/carbon/H) //Always use this when beheading someone.
-	brain = H.getorgan(/obj/item/organ/brain)
-	H.internal_organs -= brain //Goodbye brain
-	transfer_identity(H)
+/obj/item/organ/limb/head/proc/behead() //Always use this when beheading someone.
+	suborgans["brain"] = owner.getorgan("brain")
+	if(istype(/mob/living/carbon/human, owner)) //Temporary solution until I expand the organsystems to all subtypes of carbon.
+		var/mob/living/carbon/human/H = owner
+		H.internal_organs -= suborgans["brain"] //Goodbye brain
+	transfer_identity()
 
-/obj/item/organ/limb/head/proc/transfer_identity(mob/living/carbon/H) //Copied from /obj/item/organ/brain. Use this to turn a human into a head.
-	name = "[H]'s head"
-	brain.name = "[brainmob.real_name]'s brain"
+/obj/item/organ/limb/head/proc/transfer_identity() //Copied from /obj/item/organ/brain. Use this to turn a human into a head.
+	var/obj/item/organ/brain/brain = suborgans["brain"]
 	brainmob = new(src)
-	brainmob.name = H.real_name
-	brainmob.real_name = H.real_name
-	brainmob.dna = H.dna
-	brainmob.timeofhostdeath = H.timeofdeath
-	if(H.mind)
-		H.mind.transfer_to(brainmob)
+	brainmob.name = owner.name
+	brainmob.real_name = owner.real_name
+	if(istype(/mob/living/carbon/human, owner)) //Only humans have DNA right now.
+		var/mob/living/carbon/human/H = owner
+		brainmob.dna = H.dna
+	brainmob.timeofhostdeath = owner.timeofdeath
+	name = "[brainmob.name]'s head"
+	brain.name = "[brainmob.real_name]'s brain"
+	if(owner.mind)
+		owner.mind.transfer_to(brainmob)
 	brainmob << "<span class='notice'>You can no longer feel the rest of your body.</span>"
 
 /obj/item/organ/limb/head/proc/transfer_identity_from_head_to_brain() //Prepare brain for removal from this head. Call right before you pull the brain out.
+	var/obj/item/organ/brain/brain = suborgans["brain"]
 	if(brain && brainmob)
 		brain.brainmob = brainmob
 		brainmob.container = brain
@@ -102,6 +109,7 @@
 		brainmob = null
 
 /obj/item/organ/limb/head/proc/transfer_identity_from_brain_to_head() //Achieves the reverse effect. Call right after you stuff the brain in.
+	var/obj/item/organ/brain/brain = suborgans["brain"]
 	if(brain && brain.brainmob)
 		brainmob = brain.brainmob
 		brain.brainmob = null
@@ -110,6 +118,7 @@
 
 /obj/item/organ/limb/head/attackby(var/obj/item/O as obj, var/mob/user as mob, params) //Copied from MMI
 	user.changeNext_move(CLICK_CD_MELEE)
+	var/obj/item/organ/brain/brain = suborgans["brain"]
 	if(istype(O,/obj/item/organ/brain))
 		var/obj/item/organ/brain/newbrain = O
 		if(brain)

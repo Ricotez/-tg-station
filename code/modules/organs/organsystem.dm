@@ -9,9 +9,17 @@
 
 /datum/organsystem
 	var/list/organlist = new/list()
+	var/mob/owner = null
 
 /datum/organsystem/proc/getorgan(name)
 	return organlist["[name]"]
+
+/datum/organsystem/proc/set_owner(var/mob/O)
+	owner = O
+	for(var/limbname in organlist)
+		var/datum/organ/organdata = organlist[limbname]
+		organdata.owner = O
+
 
 /datum/organsystem/Destroy()
 	for(var/datum/organ/O in organlist)
@@ -23,6 +31,7 @@
 /datum/organsystem/humanoid //All humanoids have the following basic structure.
 
 	New()
+		..()
 		organlist["chest"]	= new/datum/organ/limb/chest/()
 		organlist["head"]	= new/datum/organ/limb/head/(getorgan("chest"))
 		organlist["l_arm"]	= new/datum/organ/limb/l_arm/(getorgan("chest"))

@@ -176,6 +176,14 @@
 	flags = NOSHIELD
 	var/datum/effect/effect/system/spark_spread/spark_system
 
+	can_dismember = 1
+	can_behead = 1
+	dismember_threshold = 0
+	behead_threshold = 20
+	dismember_prob = 50
+	behead_prob = 25
+	dismember_nobleed = 1	//Limbs cut off by an esword are instantly cauterized.
+
 //Most of the other special functions are handled in their own files. aka special snowflake code so kewl
 /obj/item/weapon/melee/energy/blade/New()
 	spark_system = new /datum/effect/effect/system/spark_spread()

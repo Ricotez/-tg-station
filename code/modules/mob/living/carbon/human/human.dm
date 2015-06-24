@@ -22,6 +22,7 @@
 					 /obj/item/organ/limb/r_arm, /obj/item/organ/limb/r_leg, /obj/item/organ/limb/l_leg)*/
 
 	organsystem = new/datum/organsystem/humanoid/human
+	organsystem.set_owner(src)
 
 	//YES THIS IS KIND OF WEIRD but it's how BYOND works, I would have much rather used getorgan().set_organitem |- Ricotez
 	var/datum/organ/setter
@@ -48,15 +49,12 @@
 	setter = getorgan("brain")
 	setter.set_organitem(new/obj/item/organ/brain)
 
-	for(var/datum/organ/limb/O in organsystem.organlist)
-		O.owner = src
-		if(O.organitem)
-			O.organitem.owner = src
-
 	//Same story, I want to deprecate this but it's pretty important so for now, let's keep it updated. |- Ricotez
 	internal_organs += getorgan("appendix")
 	internal_organs += getorgan("heart")
 	internal_organs += getorgan("brain")
+
+	update_body_parts()
 
 
 	// for spawned humans; overwritten by other code
