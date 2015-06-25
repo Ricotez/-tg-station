@@ -54,8 +54,6 @@
 	internal_organs += getorgan("heart")
 	internal_organs += getorgan("brain")
 
-	update_body_parts()
-
 
 	// for spawned humans; overwritten by other code
 	ready_dna(src)
@@ -66,6 +64,15 @@
 	..()
 	var/mob/M = src
 	faction |= "\ref[M]"
+
+	update_body_parts()
+
+
+//Gets us a convenient list of limbs that matter for stuff like rendering and checking damage.
+//Please update this if you break down limbs into more limbs (arm to arm and hand or stuff like that). |- Ricotez
+/mob/living/carbon/human/proc/list_limbs()
+	return list("head", "chest", "l_arm", "r_arm", "l_leg", "r_leg")
+
 
 /mob/living/carbon/human/prepare_data_huds()
 	//Update med hud images...
@@ -719,38 +726,49 @@
 			visible_message( \
 				"[src] examines \himself.", \
 				"<span class='notice'>You check yourself for injuries.</span>")
+			var/list/limblist = list_limbs()
+			for(var/limbname in limblist)
+				var/datum/organ/limb/limbdata = getorgan(limbname)
+				if(limbdata.exists())
+					var/obj/item/organ/limb/org = limbdata.organitem
+					var/status = ""
+					var/brutedamage = org.brute_dam
+					var/burndamage = org.burn_dam
+					if(hallucination)
+						if(prob(30))
+							brutedamage += rand(30,40)
+						if(prob(30))
+							burndamage += rand(30,40)
 
-			for(var/obj/item/organ/limb/org in organs)
-				var/status = ""
-				var/brutedamage = org.brute_dam
-				var/burndamage = org.burn_dam
-				if(hallucination)
-					if(prob(30))
-						brutedamage += rand(30,40)
-					if(prob(30))
-						burndamage += rand(30,40)
+					if(brutedamage > 0)
+						status = "bruised"
+					if(brutedamage > 20)
+						status = "battered"
+					if(brutedamage > 40)
+						status = "mangled"
+					if(brutedamage > 0 && burndamage > 0)
+						status += " and "
+					if(burndamage > 40)
+						status += "peeling away"
 
-				if(brutedamage > 0)
-					status = "bruised"
-				if(brutedamage > 20)
-					status = "battered"
-				if(brutedamage > 40)
-					status = "mangled"
-				if(brutedamage > 0 && burndamage > 0)
-					status += " and "
-				if(burndamage > 40)
-					status += "peeling away"
+					else if(burndamage > 10)
+						status += "blistered"
+					else if(burndamage > 0)
+						status += "numb"
+					if(status == "")
+						status = "OK"
+					src << "\t [status == "OK" ? "\blue" : "\red"] Your [org.getDisplayName()] is [status]."
 
-				else if(burndamage > 10)
-					status += "blistered"
-				else if(burndamage > 0)
-					status += "numb"
-				if(status == "")
-					status = "OK"
-				src << "\t [status == "OK" ? "\blue" : "\red"] Your [org.getDisplayName()] is [status]."
+					for(var/obj/item/I in org.embedded_objects)
+						src << "\t <a href='byond://?src=\ref[src];embedded_object=\ref[I];embedded_limb=\ref[org]'>\red There is \a [I] embedded in your [org.getDisplayName()]!</a>"
 
-				for(var/obj/item/I in org.embedded_objects)
-					src << "\t <a href='byond://?src=\ref[src];embedded_object=\ref[I];embedded_limb=\ref[org]'>\red There is \a [I] embedded in your [org.getDisplayName()]!</a>"
+				else
+					if(limbdata.status & ORGAN_DESTROYED)
+						src << "\t \red Your [limbdata.getDisplayName()] is missing and the wound bleeds terribly!"
+					else if(limbdata.status & ORGAN_NOBLEED)
+						src << "\t \red Your [limbdata.getDisplayName()] is missing and the wound hurts!"
+					else if(limbdata.status & ORGAN_REMOVED)
+						src << "\t You don't have \a [limbdata.getDisplayName()]."
 
 			if(blood_max)
 				src << "<span class='danger'>You are bleeding!</span>"

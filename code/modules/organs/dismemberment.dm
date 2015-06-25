@@ -15,10 +15,11 @@
 
 //This proc is called in attacked_by() which you can find in item_attack.dm, and it assumes that the weapon already made contact with the body part.
 //All this proc does is determine if the weapon can dismember the target limb, and then dismember it with the given probability.
-/obj/item/weapon/handle_dismemberment(datum/organ/limb/limbdata)
+/obj/item/weapon/handle_dismemberment(var/datum/organ/limb/limbdata)
+	visible_message("This is a test message. handle_dismemberment has been called.", "This is a test message. handle_dismemberment has been called.")
 	var/obj/item/organ/limb/L = limbdata.organitem
 	//In this big check we determine if this weapon has met the conditions to cut off this limb.
-	if((L.name == "head" && can_behead && limbdata.exists() && (L.brute_dam + L.burn_dam >= behead_prob) && prob(behead_prob)) || (can_be_dismembered(L.name) && can_dismember && limbdata.exists() && (L.brute_dam + L.burn_dam >= dismember_threshold) && prob(dismember_prob)))
+	if((can_behead && L.name == "head" && limbdata.exists() && (L.brute_dam + L.burn_dam >= behead_threshold) && prob(behead_prob)) || (can_dismember && can_be_dismembered(limbdata.name) && limbdata.exists() && (L.brute_dam + L.burn_dam >= dismember_threshold) && prob(dismember_prob)))
 		if(dismember_nobleed)
 			return limbdata.dismember(ORGAN_NOBLEED)
 		else

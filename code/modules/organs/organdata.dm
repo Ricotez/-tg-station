@@ -81,3 +81,15 @@
 /datum/organ/appendix
 	name = "appendix"
 	organitem_type = /obj/item/organ/appendix
+
+
+//Returns a display name for the organ. Copied from organ items.
+/datum/organ/proc/getDisplayName() //Added "Chest" and "Head" just in case, this may not be needed
+	switch(name)
+		if("l_leg")		return "left leg"
+		if("r_leg")		return "right leg"
+		if("l_arm")		return "left arm"
+		if("r_arm")		return "right arm"
+		if("chest")     return "chest"
+		if("head")		return "head"
+		else			return name

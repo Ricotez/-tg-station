@@ -11,6 +11,7 @@
 /obj/item/organ/heart
 	name = "heart"
 	icon_state = "heart-on"
+	desc = "Some days, your heart is just not in it."
 	var/beating = 1
 
 /obj/item/organ/heart/update_icon()
@@ -19,10 +20,16 @@
 	else
 		icon_state = "heart-off"
 
+/obj/item/organ/heart/examine(mob/user)
+	if(beating)
+		user << "It's still beating."
+	else
+		user << "It stopped beating."
 
 /obj/item/organ/appendix
 	name = "appendix"
 	icon_state = "appendix"
+	desc = "The greyshirt among the organs."
 	var/inflamed = 1
 
 /obj/item/organ/appendix/update_icon()
