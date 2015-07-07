@@ -41,6 +41,7 @@
 		"<span class='userdanger'>[attack_message]</span>")
 
 /mob/living/carbon/attacked_by(var/obj/item/I, var/mob/living/user, var/def_zone)
+	user << "[def_zone]"
 	if(organsystem)
 		if(def_zone == "groin")
 			def_zone = "chest"

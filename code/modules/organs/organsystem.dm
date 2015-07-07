@@ -10,15 +10,38 @@
 /datum/organsystem
 	var/list/organlist = new/list()
 	var/mob/owner = null
+	var/obj/item/organ/coreitem = null		//The item that forms the core of this organsystem. Will usually be the chest.
+	var/datum/organ/limb/coredata = null	//The data associated with the core item. Of lesser importance, given that the core item cannot be removed from an organsystem.
 
-/datum/organsystem/proc/getorgan(name)
-	return organlist["[name]"]
+	New(var/mob/O)
+		owner = O
 
+/datum/organsystem/proc/getorgan(var/name)
+	return organlist[name]
+
+
+/**
+  * Set the owner of this organsystem and all organs contained in it.
+  * This will recursively go through all organs to ensure their owners are all properly set.
+  * @input O: The new owner. Has to be a mob.
+ **/
 /datum/organsystem/proc/set_owner(var/mob/O)
 	owner = O
+	core.set_owner(var/mob/O)
+
+/**
+  * Override the DNA of all organs in this organsystem.
+  *	For example when user injects themselves with a syringe.
+  * Note that this proc works iteratively rather than recursively, and changes only the DNA of the organlist.
+  *	@input D: The DNA to base the overwrite on.
+ **/
+/datum/organsystem/proc/set_dna(var/datum/dna/D)
 	for(var/limbname in organlist)
 		var/datum/organ/organdata = organlist[limbname]
-		organdata.owner = O
+		organdata.set_dna(D)
+
+/datum/organsystem/proc/remove_organ(var/list_name)
+	return organlist.Remove(list_name)
 
 
 /datum/organsystem/Destroy()
@@ -30,19 +53,24 @@
 
 /datum/organsystem/humanoid //All humanoids have the following basic structure.
 
-	New()
-		..()
-		organlist["chest"]	= new/datum/organ/limb/chest/()
-		organlist["head"]	= new/datum/organ/limb/head/(getorgan("chest"))
-		organlist["l_arm"]	= new/datum/organ/limb/l_arm/(getorgan("chest"))
-		organlist["r_arm"]	= new/datum/organ/limb/r_arm/(getorgan("chest"))
-		organlist["l_leg"]	= new/datum/organ/limb/l_leg/(getorgan("chest"))
-		organlist["r_leg"]	= new/datum/organ/limb/r_leg/(getorgan("chest"))
-		organlist["brain"]	= new/datum/organ/brain/(getorgan("head"))
+	New(var/mob/O)
+		..(O)
+		var/obj/item/organ/current
+		coreitem = new/obj/item/organ/limb/chest()
+		coredata = new/datum/organ/limb/chest(null, coreitem) //The coredata has no parent, and its item is of course the coreitem.
+		core.set_organitem(coreitem)
+		organlist["chest"]	= core
+		organlist["head"]	= new/datum/organ/limb/head(core, new/obj/item/organ/limb/head())
+		organlist["l_arm"]	= new/datum/organ/limb/l_arm(core, new/obj/item/organ/limb/l_arm())
+		organlist["r_arm"]	= new/datum/organ/limb/r_arm(core, new/obj/item/ogan/limb/r_arm())
+		organlist["l_leg"]	= new/datum/organ/limb/l_leg(core, new/obj/item/organ/limb/l_leg())
+		organlist["r_leg"]	= new/datum/organ/limb/r_leg(core, new/obj/item/organ/limb/r_leg())
+		var/H = organlist["head"]
+		organlist["brain"]	= new/datum/organ/brain(H, new/obj/item/organ/brain())
 
 /datum/organsystem/humanoid/human //Only humans have appendices and hearts.
 
-	New()
-		..()
-		organlist["appendix"]	= new/datum/organ/appendix/(getorgan("chest"))
-		organlist["heart"]		= new/datum/organ/heart/(getorgan("chest"))
+	New(var/mob/O)
+		..(O)
+		organlist["appendix"]	= new/datum/organ/appendix(core, new/obj/item/organ/appendix())
+		organlist["heart"]		= new/datum/organ/heart(core, new/obj/item/organ/heart())

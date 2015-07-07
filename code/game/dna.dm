@@ -25,6 +25,7 @@
 	var/real_name //Stores the real name of the person who originally got this dna datum. Used primarely for changelings,
 	var/list/mutations = list()   //All mutations are from now on here
 	var/mob/living/carbon/holder
+	var/obj/item/organ/holder_organ
 
 /datum/dna/New(mob/living/carbon/new_holder)
 	if(new_holder && istype(new_holder))

@@ -21,16 +21,25 @@
 			brainmob.client.screen.len = null //clear the hud
 
 
-/obj/item/organ/brain/proc/transfer_identity(mob/living/carbon/H)
+/**
+  * Transfers a person from their original mob to a brainmob inside of this brain.
+  * Relies on the organ's owner now, so please call this BEFORE the brain is removed from a mob or the owner var will be set to null.
+ **/
+/obj/item/organ/brain/proc/transfer_identity()
+	if(!owner)
+		return
 	name = "[H]'s brain"
 	brainmob = new(src)
-	brainmob.name = H.real_name
-	brainmob.real_name = H.real_name
-	brainmob.dna = H.dna
-	brainmob.timeofhostdeath = H.timeofdeath
-	if(H.mind)
-		H.mind.transfer_to(brainmob)
-	brainmob << "<span class='notice'>You feel slightly disoriented. That's normal when you're just a brain.</span>"
+	brainmob.name = owner.real_name
+	brainmob.real_name = owner.real_name
+	brainmob.dna = owner.dna
+	brainmob.timeofhostdeath = owner.timeofdeath
+	if(owner.mind)
+		owner.mind.transfer_to(brainmob)
+	if(organdatum && organdatum.parent) //If the organdatum is not null, this brain is a suborgan. We check for the parent just in case.
+		brainmob << "<span class='notice'>You feel slightly disoriented. That's normal when you're just \a [organdatum.parent.getDisplayName()]."
+	else
+		brainmob << "<span class='notice'>You feel slightly disoriented. That's normal when you're just a brain.</span>"
 
 
 /obj/item/organ/brain/examine(mob/user)
